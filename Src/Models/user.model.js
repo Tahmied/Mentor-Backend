@@ -17,13 +17,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    dpLocalPath: {
+    dpPath: {
         type: String,
         required: false
-    },
-    agreedToTerms: {
-        type: Boolean,
-        required: true
     },
     refreshToken: {
         type: String
@@ -31,6 +27,9 @@ const UserSchema = new mongoose.Schema({
     isInstructor: {
         type: Boolean,
         default: false
+    }, 
+    accessToken: {
+        type : String
     }
 },
     {
