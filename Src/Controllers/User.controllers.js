@@ -1,6 +1,10 @@
+import dotenv from 'dotenv';
 import { User } from "../Models/user.model.js";
 import { ApiError } from "../Utils/apiError.js";
+import { ApiResponse } from "../Utils/apiResponse.js";
 import { asyncHandler } from "../Utils/asyncHandler.js";
+
+dotenv.config({path:'./.env'})
 
 async function generateAccessAndRefreshToken(userId) {
     try {
@@ -35,6 +39,9 @@ export const registerUser = asyncHandler(async (req, res) => {
         newUser = await User.create({
             fullName, email, password, dpPath, isInstructor: false
         })
+        res.status(200).json(
+            new ApiResponse(200 , {'message' : 'user registered successfully'}, 'user registered successfully')
+        )
     } catch (error) {
         throw new ApiError(500, `unable to register user due to ${error}`)
     }

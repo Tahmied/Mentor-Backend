@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import { User } from '../Models/user.model';
-import { ApiError } from '../Utils/apiError';
-import { asyncHandler } from '../Utils/asyncHandler';
+import { User } from '../Models/user.model.js';
+import { ApiError } from '../Utils/apiError.js';
+import { asyncHandler } from '../Utils/asyncHandler.js';
 
 
 export const findUser = asyncHandler(async (req, res, next) => {
