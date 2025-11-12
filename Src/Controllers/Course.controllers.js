@@ -86,3 +86,45 @@ export const getMyCourses = asyncHandler(async (req, res) => {
         new ApiResponse(200, courses, 'User\'s courses fetched successfully')
     );
 });
+
+export const updateCourse = asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const updateData = req.body; 
+    const userId = req.user?._id;
+
+    if (!userId) {
+        throw new ApiError(401, 'User not authenticated');
+    }
+
+    if (!courseId) {
+        throw new ApiError(400, 'Course ID is required');
+    }
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+        throw new ApiError(404, 'Course not found');
+    }
+
+    if (course.instructor.toString() !== userId.toString()) {
+        throw new ApiError(403, 'You are not authorized to edit this course');
+    }
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+        courseId,
+        {
+            $set: updateData
+        },
+        {
+            new: true, 
+            runValidators: true 
+        }
+    );
+
+    if (!updatedCourse) {
+        throw new ApiError(500, 'Failed to update the course');
+    }
+    return res.status(200).json(
+        new ApiResponse(200, updatedCourse, 'Course updated successfully')
+    );
+});
