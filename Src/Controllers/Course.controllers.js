@@ -5,9 +5,16 @@ import { asyncHandler } from "../Utils/asyncHandler.js";
 
 export const createCourse = asyncHandler(async (req, res) => {
     const { title, description, thumbnail, price, duration, category, lessons } = req.body;
-    const instructorId = req.user?._id;
+    const instructorId = req.user?._id
+
+    const instructor = req.user
+    
+    if (instructor.isInstructor !== true) {
+        instructor.isInstructor = true
+        await instructor.save({ validateBeforeSave: false })
+    }
     if (!instructorId) {
-        throw new ApiError(401, 'User not authenticated');
+        throw new ApiError(401, 'User not authenticated')
     }
 
     if (!title || !description || !thumbnail || !price || !duration || !category) {
@@ -25,8 +32,8 @@ export const createCourse = asyncHandler(async (req, res) => {
         price,
         duration,
         category,
-        lessons, 
-        instructor: instructorId 
+        lessons,
+        instructor: instructorId
     });
 
     return res.status(201).json(
@@ -36,8 +43,8 @@ export const createCourse = asyncHandler(async (req, res) => {
 
 export const getAllCourses = asyncHandler(async (req, res) => {
     const courses = await Course.find({})
-        .populate('instructor', 'fullName dpPath') 
-        .select('-lessons'); 
+        .populate('instructor', 'fullName dpPath')
+        .select('-lessons');
 
     const formattedCourses = courses.map(course => ({
         _id: course._id,
@@ -47,7 +54,7 @@ export const getAllCourses = asyncHandler(async (req, res) => {
         price: course.price,
         lessons: course.lessons ? course.lessons.length : 0,
         instructor: course.instructor
-       
+
     }));
 
     return res.status(200).json(
@@ -89,7 +96,7 @@ export const getMyCourses = asyncHandler(async (req, res) => {
 
 export const updateCourse = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
-    const updateData = req.body; 
+    const updateData = req.body;
     const userId = req.user?._id;
 
     if (!userId) {
@@ -116,8 +123,8 @@ export const updateCourse = asyncHandler(async (req, res) => {
             $set: updateData
         },
         {
-            new: true, 
-            runValidators: true 
+            new: true,
+            runValidators: true
         }
     );
 
