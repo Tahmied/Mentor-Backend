@@ -4,10 +4,11 @@ import { findUser } from "../Middlewares/auth.middleware.js";
 
 const router = Router()
 
+router.put('/updateCourse/:courseId', findUser, updateCourse)
 router.get('/getAllCourses', getAllCourses)
 router.get('/my-courses', findUser, getMyCourses)
 router.get('/:courseId', getCourseById)
 router.post('/addCourse', findUser, createCourse)
-router.put('/updateCourse', findUser, updateCourse)
+
 
 export default router
