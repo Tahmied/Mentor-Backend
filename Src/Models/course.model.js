@@ -23,7 +23,7 @@ const courseSchema = new mongoose.Schema({
         required: [true, 'Course description is required']
     },
     thumbnail: {
-        type: String, 
+        type: String,
         required: [true, 'Thumbnail URL is required']
     },
     price: {
@@ -32,7 +32,7 @@ const courseSchema = new mongoose.Schema({
         default: 0
     },
     duration: {
-        type: String, 
+        type: String,
         required: [true, 'Duration is required']
     },
     category: {
@@ -45,7 +45,11 @@ const courseSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    lessons: [lessonSchema] 
+    lessons: [lessonSchema],
+    studentsEnrolled: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
 }, {
     timestamps: true
 });

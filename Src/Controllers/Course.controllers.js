@@ -1,4 +1,5 @@
 import { Course } from "../Models/course.model.js";
+import { User } from "../Models/user.model.js";
 import { ApiError } from "../Utils/apiError.js";
 import { ApiResponse } from "../Utils/apiResponse.js";
 import { asyncHandler } from "../Utils/asyncHandler.js";
@@ -132,5 +133,57 @@ export const updateCourse = asyncHandler(async (req, res) => {
     }
     return res.status(200).json(
         new ApiResponse(200, updatedCourse, 'Course updated successfully')
+    );
+});
+
+export const enrollInCourse = asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const userId = req.user?._id;
+
+    if (!userId) {
+        throw new ApiError(401, 'User must be logged in');
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+        throw new ApiError(404, 'Course not found');
+    }
+    const user = req.user; 
+
+    if (user.enrolledCourses.includes(courseId)) {
+        throw new ApiError(409, 'You already enrolled this course');
+    }
+    user.enrolledCourses.push(courseId);
+    course.studentsEnrolled.push(userId);
+    await user.save({ validateBeforeSave: false });
+    await course.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new ApiResponse(200, { courseId }, 'Enrolled successfully')
+    );
+});
+
+
+export const getMyEnrolledCourses = asyncHandler(async (req, res) => {
+    const userId = req.user?._id;
+
+    if (!userId) {
+        throw new ApiError(401, 'User not logged in');
+    }
+    const user = await User.findById(userId).populate({
+        path: 'enrolledCourses',
+        select: '-lessons',
+        populate: {
+            path: 'instructor',
+            select: 'fullName dpPath' 
+        }
+    });
+
+    if (!user) {
+        throw new ApiError(404, 'User not found');
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, user.enrolledCourses, 'All enrolled courses fetched')
     );
 });

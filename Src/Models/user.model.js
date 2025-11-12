@@ -27,10 +27,14 @@ const UserSchema = new mongoose.Schema({
     isInstructor: {
         type: Boolean,
         default: false
-    }, 
+    },
     accessToken: {
-        type : String
-    }
+        type: String
+    },
+    enrolledCourses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+    }]
 },
     {
         timestamps: true
@@ -39,10 +43,6 @@ const UserSchema = new mongoose.Schema({
 UserSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 10);
-    }
-
-    if (this.isModified('trxPassword') && this.trxPassword) {
-        this.trxPassword = await bcrypt.hash(this.trxPassword, 10);
     }
     next();
 });
