@@ -20,9 +20,10 @@ app.use(express.static('public'))
 app.use(cookieParser())
 
 // routes declaation
+import { errorHandler } from './Middlewares/error.middleware.js'
 import userRoutes from './Routes/user.routes.js'
 
 app.use('/api/v1/users', userRoutes)
 
-
+app.use(errorHandler)
 export { app }

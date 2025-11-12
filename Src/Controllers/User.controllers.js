@@ -4,7 +4,7 @@ import { ApiError } from "../Utils/apiError.js";
 import { ApiResponse } from "../Utils/apiResponse.js";
 import { asyncHandler } from "../Utils/asyncHandler.js";
 
-dotenv.config({path:'./.env'})
+dotenv.config({ path: './.env' })
 
 async function generateAccessAndRefreshToken(userId) {
     try {
@@ -40,7 +40,7 @@ export const registerUser = asyncHandler(async (req, res) => {
             fullName, email, password, dpPath, isInstructor: false
         })
         res.status(200).json(
-            new ApiResponse(200 , {'message' : 'user registered successfully'}, 'user registered successfully')
+            new ApiResponse(200, { 'message': 'user registered successfully' }, 'user registered successfully')
         )
     } catch (error) {
         throw new ApiError(500, `unable to register user due to ${error}`)
@@ -120,3 +120,90 @@ export const loginCheck = asyncHandler(async (req, res) => {
     }
     return res.status(200).json(new ApiResponse(200, '', 'user is logged in'))
 })
+
+export const userDetails = asyncHandler(async (req, res) => {
+    let user = req.user
+    if (!user) {
+        throw new ApiError(400, 'user not found, please login again')
+    }
+    const data = {
+        email: user.email,
+        fullName: user.fullName,
+        accessToken: req.token,
+        dpPath: user.dpPath
+    }
+    return res.status(200).json(
+        new ApiResponse(200, data)
+    )
+})
+
+export const checkExistingUser = asyncHandler(async (req, res) => {
+    const { email } = req.body
+    const authHeader = req.headers['authorization'];
+    console.log('received ', authHeader)
+    if (!authHeader || authHeader !== `Bearer ${process.env.SERVER_SECRET}`) {
+        throw new ApiError(403, 'Unauthorized request');
+    }
+    if (!email) {
+        throw new ApiError('email must be given in body')
+    }
+
+    const user = await User.findOne({ email })
+    if (user) {
+        return res.status(200).json(
+            new ApiResponse(200, user, 'user found')
+        )
+    } else {
+        return res.status(400).json(
+            new ApiResponse(400, {}, 'user not found')
+        )
+    }
+})
+
+export const getUserProfile = asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (!user) {
+        throw new ApiError(401, 'User not authenticated, please login');
+    }
+
+    const userData = {
+        email: user.email,
+        fullName: user.fullName,
+        dpPath: user.dpPath
+    };
+
+    return res.status(200).json(
+        new ApiResponse(200, userData, 'User profile fetched successfully')
+    );
+});
+
+export const updateUserProfile = asyncHandler(async (req, res) => {
+    const { fullName, dpPath } = req.body;
+    const userId = req.user?._id;
+
+    if (!userId) {
+        throw new ApiError(401, 'User not authenticated, please login');
+    }
+
+    const updateData = {};
+    if (fullName) updateData.fullName = fullName;
+    if (dpPath) updateData.dpPath = dpPath;
+
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $set: updateData },
+        { 
+            new: true, 
+            runValidators: true 
+        }
+    ).select('-password -refreshToken'); 
+
+    if (!updatedUser) {
+        throw new ApiError(404, 'User not found');
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedUser, 'Profile updated successfully')
+    );
+});
