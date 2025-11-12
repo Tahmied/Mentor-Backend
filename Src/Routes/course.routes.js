@@ -7,11 +7,9 @@ const router = Router()
 router.put('/updateCourse/:courseId', findUser, updateCourse)
 router.get('/getAllCourses', getAllCourses)
 router.get('/my-courses', findUser, getMyCourses)
-router.get('/:courseId', getCourseById)
 router.post('/addCourse', findUser, createCourse)
-
-router.post('/:courseId/enroll', findUser, enrollInCourse)
 router.get('/my-enrollments', findUser, getMyEnrolledCourses)
-
+router.get('/:courseId', getCourseById)
+router.post('/:courseId/enroll', findUser, enrollInCourse)
 
 export default router

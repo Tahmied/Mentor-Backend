@@ -163,7 +163,6 @@ export const enrollInCourse = asyncHandler(async (req, res) => {
     );
 });
 
-
 export const getMyEnrolledCourses = asyncHandler(async (req, res) => {
     const userId = req.user?._id;
 
