@@ -34,7 +34,6 @@ export const createCourse = asyncHandler(async (req, res) => {
     );
 });
 
-
 export const getAllCourses = asyncHandler(async (req, res) => {
     const courses = await Course.find({})
         .populate('instructor', 'fullName dpPath') 
@@ -74,3 +73,16 @@ export const getCourseById = asyncHandler(async (req, res) => {
     );
 });
 
+export const getMyCourses = asyncHandler(async (req, res) => {
+    const instructorId = req.user?._id
+
+    if (!instructorId) {
+        throw new ApiError(401, 'User not authenticated');
+    }
+    const courses = await Course.find({ instructor: instructorId })
+        .sort({ createdAt: -1 });
+
+    return res.status(200).json(
+        new ApiResponse(200, courses, 'User\'s courses fetched successfully')
+    );
+});
