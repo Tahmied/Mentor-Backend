@@ -53,10 +53,6 @@ UserSchema.methods.isPassCorrect = async function (password) {
     return bcrypt.compare(password, this.password)
 }
 
-UserSchema.methods.isTrxPassCorrect = async function (trxPass) {
-    return bcrypt.compare(trxPass, this.trxPassword)
-}
-
 UserSchema.methods.generateAccessToken = function () {
     return jwt.sign({
         _id: this._id,
