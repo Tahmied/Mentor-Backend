@@ -44,7 +44,6 @@ export const createCourse = asyncHandler(async (req, res) => {
 export const getAllCourses = asyncHandler(async (req, res) => {
     const courses = await Course.find({})
         .populate('instructor', 'fullName dpPath')
-        .select('-lessons');
 
     const formattedCourses = courses.map(course => ({
         _id: course._id,
@@ -52,7 +51,7 @@ export const getAllCourses = asyncHandler(async (req, res) => {
         category: course.category,
         thumbnail: course.thumbnail,
         price: course.price,
-        lessons: course.lessons ? course.lessons.length : 0,
+        lessons: course.lessons.length,
         instructor: course.instructor
 
     }));
