@@ -186,3 +186,57 @@ export const getMyEnrolledCourses = asyncHandler(async (req, res) => {
         new ApiResponse(200, user.enrolledCourses, 'All enrolled courses fetched')
     );
 });
+
+export const checkEnrollmentStatus = asyncHandler(async (req, res) => {
+    const { courseId } = req.params
+    const user = req.user
+
+    if (!user) {
+        throw new ApiError(401, 'User must be logged in')
+    }
+
+    if (!courseId) {
+        throw new ApiError(400, 'Course ID is a required field')
+    }
+    
+    const isEnrolled = user.enrolledCourses.some(
+        (enrolledCourseId) => enrolledCourseId.toString() === courseId.toString()
+    );
+    return res.status(200).json(
+        new ApiResponse(200, { isEnrolled }, 'Course enrollement verified')
+    );
+});
+
+export const deleteCourse = asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const userId = req.user?._id;
+
+    if (!userId) {
+        throw new ApiError(401, 'User not logged in');
+    }
+
+    if (!courseId) {
+        throw new ApiError(400, 'Course ID is a required field');
+    }
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+        throw new ApiError(404, 'Course not found');
+    }
+
+    if (course.instructor.toString() !== userId.toString()) {
+        throw new ApiError(403, 'You are not authorized to delete this course');
+    }
+
+    await User.updateMany(
+        { _id: { $in: course.studentsEnrolled } },
+        { $pull: { enrolledCourses: courseId } }
+    );
+
+    await Course.findByIdAndDelete(courseId);
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, 'Course deleted successfully')
+    );
+});
